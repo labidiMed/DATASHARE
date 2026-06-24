@@ -1,0 +1,11 @@
+# Éditeurs / outils
+.vscode/
+.claude/
+.idea/
+
+# Secrets d'infrastructure (utiliser .env.example comme modèle)
+.env
+
+# Divers
+.DS_Store
+*.log
