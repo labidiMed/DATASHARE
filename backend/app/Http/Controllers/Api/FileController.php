@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\StoreFileRequest;
 use App\Http\Resources\FileResource;
 use App\Models\File;
+use App\Models\User;
 use App\Services\FileStorageService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -31,25 +32,16 @@ class FileController extends Controller
 
     public function store(StoreFileRequest $request): JsonResponse
     {
-        $upload = $request->file('file');
+        $file = $this->createFile($request, $request->user());
 
-        $file = $request->user()->files()->create([
-            'original_name' => $upload->getClientOriginalName(),
-            'stored_path' => $this->storage->store($upload),
-            'mime_type' => $upload->getClientMimeType(),
-            'size_bytes' => $upload->getSize(),
-            'download_token' => $this->storage->generateToken(),
-            'password_hash' => $request->filled('password') ? Hash::make($request->input('password')) : null,
-            'expires_at' => now()->addDays($request->integer('expires_in_days', 7)),
-        ]);
+        return FileResource::make($file->load('tags'))
+            ->response()
+            ->setStatusCode(201);
+    }
 
-        if ($request->filled('tags')) {
-            $tagIds = collect($request->input('tags'))
-                ->unique()
-                ->map(fn (string $name) => $request->user()->tags()->firstOrCreate(['name' => $name])->id);
-
-            $file->tags()->sync($tagIds);
-        }
+    public function storeAnonymous(StoreFileRequest $request): JsonResponse
+    {
+        $file = $this->createFile($request, null);
 
         return FileResource::make($file->load('tags'))
             ->response()
@@ -71,6 +63,33 @@ class FileController extends Controller
         $file->delete();
 
         return response()->json(null, 204);
+    }
+
+    private function createFile(StoreFileRequest $request, ?User $user): File
+    {
+        $upload = $request->file('file');
+
+        $file = File::create([
+            'user_id' => $user?->id,
+            'original_name' => $upload->getClientOriginalName(),
+            'stored_path' => $this->storage->store($upload),
+            'mime_type' => $upload->getClientMimeType(),
+            'size_bytes' => $upload->getSize(),
+            'download_token' => $this->storage->generateToken(),
+            'password_hash' => $request->filled('password') ? Hash::make($request->input('password')) : null,
+            'expires_at' => now()->addDays($request->integer('expires_in_days', 7)),
+        ]);
+
+        // Les tags appartiennent à un utilisateur : ignorés pour un upload anonyme.
+        if ($user && $request->filled('tags')) {
+            $tagIds = collect($request->input('tags'))
+                ->unique()
+                ->map(fn (string $name) => $user->tags()->firstOrCreate(['name' => $name])->id);
+
+            $file->tags()->sync($tagIds);
+        }
+
+        return $file;
     }
 
     private function authorizeOwner(Request $request, File $file): void

@@ -16,6 +16,8 @@ Route::prefix('auth')->group(function () {
     });
 });
 
+Route::post('files/anonymous', [FileController::class, 'storeAnonymous']);
+
 Route::get('download/{token}', [DownloadController::class, 'show']);
 Route::post('download/{token}', [DownloadController::class, 'download']);
 
