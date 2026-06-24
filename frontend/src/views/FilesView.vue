@@ -3,8 +3,18 @@ import { ref, computed, onMounted } from 'vue'
 import api from '@/services/api'
 
 const files = ref([])
-const tab = ref('all')
+const tab = ref('active')
 const loading = ref(true)
+
+function formatSize(bytes) {
+  if (bytes < 1024) return `${bytes} o`
+  if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} Ko`
+  return `${(bytes / 1024 / 1024).toFixed(1)} Mo`
+}
+
+function formatDate(iso) {
+  return new Date(iso).toLocaleDateString('fr-FR')
+}
 
 const filtered = computed(() => {
   if (tab.value === 'active') return files.value.filter((f) => !f.is_expired)
@@ -55,6 +65,9 @@ onMounted(load)
         <li v-for="file in filtered" :key="file.id" class="row">
           <div class="info">
             <span class="name">{{ file.original_name }}</span>
+            <span class="meta">
+              {{ formatSize(file.size_bytes) }} · Envoyé le {{ formatDate(file.created_at) }}
+            </span>
             <span class="exp" :class="{ expired: file.is_expired }">{{ expirationLabel(file) }}</span>
           </div>
           <div class="row-actions">
@@ -118,6 +131,11 @@ onMounted(load)
 
 .name {
   font-weight: 500;
+}
+
+.meta {
+  font-size: 0.78rem;
+  color: var(--muted);
 }
 
 .exp {
