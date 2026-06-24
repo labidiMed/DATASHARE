@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Api\AuthController;
+use App\Http\Controllers\Api\DownloadController;
 use App\Http\Controllers\Api\FileController;
 use Illuminate\Support\Facades\Route;
 
@@ -13,6 +14,9 @@ Route::prefix('auth')->group(function () {
         Route::get('me', [AuthController::class, 'me']);
     });
 });
+
+Route::get('download/{token}', [DownloadController::class, 'show']);
+Route::post('download/{token}', [DownloadController::class, 'download']);
 
 Route::middleware('auth:api')->group(function () {
     Route::post('files', [FileController::class, 'store']);
