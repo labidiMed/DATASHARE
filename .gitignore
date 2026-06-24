@@ -9,3 +9,6 @@
 # Divers
 .DS_Store
 *.log
+
+# Références de design Figma + jeton (local uniquement)
+design/
