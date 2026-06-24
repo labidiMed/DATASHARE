@@ -18,6 +18,7 @@ export default defineConfig({
   server: {
     host: true,
     port: 5173,
+    allowedHosts: true, // autorise l'accès via Docker / tunnels (ex: host.docker.internal)
     watch: {
       usePolling: true, // requis pour le hot reload sous Windows + volume Docker
     },

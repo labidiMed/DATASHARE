@@ -1,0 +1,1 @@
+Fichier d'exemple pour les tests Cypress de DataShare.
