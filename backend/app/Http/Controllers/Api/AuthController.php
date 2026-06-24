@@ -7,12 +7,16 @@ use App\Http\Requests\LoginRequest;
 use App\Http\Requests\RegisterRequest;
 use App\Models\User;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Support\Str;
 
 class AuthController extends Controller
 {
     public function register(RegisterRequest $request): JsonResponse
     {
-        $user = User::create($request->validated());
+        $data = $request->validated();
+        $data['name'] = $data['name'] ?? Str::before($data['email'], '@');
+
+        $user = User::create($data);
         $token = auth('api')->login($user);
 
         return $this->tokenResponse($token, 201);
