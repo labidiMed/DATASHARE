@@ -6,6 +6,9 @@ RUN apt-get update && apt-get install -y \
 
 RUN docker-php-ext-install pdo pdo_pgsql bcmath zip
 
+# PCOV : driver de couverture de code pour les tests
+RUN pecl install pcov && docker-php-ext-enable pcov
+
 COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
 
 # Autorise les fichiers volumineux (objectif : 1 Go)
