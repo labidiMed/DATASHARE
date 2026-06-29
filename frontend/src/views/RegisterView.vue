@@ -53,7 +53,7 @@ async function submit() {
 
         <div class="field">
           <label for="confirm">Vérification du mot de passe</label>
-          <input id="confirm" v-model="confirm" type="password" required />
+          <input id="confirm" v-model="confirm" type="password" minlength="8" required />
         </div>
 
         <p v-if="error" class="callout callout-error">{{ error }}</p>
