@@ -1,12 +1,10 @@
 <script setup>
 import { useRouter } from 'vue-router'
-import { useAuthStore } from '@/stores/auth'
 
-const auth = useAuthStore()
 const router = useRouter()
 
 function go() {
-  router.push(auth.isAuthenticated ? '/upload' : '/login')
+  router.push('/upload')
 }
 </script>
 

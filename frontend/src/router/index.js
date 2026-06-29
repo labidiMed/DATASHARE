@@ -17,7 +17,6 @@ const router = createRouter({
       path: '/upload',
       name: 'upload',
       component: () => import('@/views/UploadView.vue'),
-      meta: { requiresAuth: true },
     },
     { path: '/download/:token', name: 'download', component: () => import('@/views/DownloadView.vue') },
   ],

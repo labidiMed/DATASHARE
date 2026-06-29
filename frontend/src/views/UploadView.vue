@@ -1,7 +1,9 @@
 <script setup>
 import { ref } from 'vue'
 import api from '@/services/api'
+import { useAuthStore } from '@/stores/auth'
 
+const auth = useAuthStore()
 const file = ref(null)
 const password = ref('')
 const expiresInDays = ref(7)
@@ -35,7 +37,8 @@ async function submit() {
   if (password.value) form.append('password', password.value)
 
   try {
-    const { data } = await api.post('/files', form)
+    const endpoint = auth.isAuthenticated ? '/files' : '/files/anonymous'
+    const { data } = await api.post(endpoint, form)
     result.value = data.data
   } catch (e) {
     const errors = e.response?.data?.errors
@@ -80,9 +83,14 @@ async function copyLink() {
 
       <!-- Formulaire -->
       <form v-else @submit.prevent="submit">
+        <p v-if="!auth.isAuthenticated" class="callout callout-info">
+          Vous n'êtes pas connecté : le fichier ne sera rattaché à aucun compte (pas d'historique).
+          <RouterLink to="/register">Créer un compte</RouterLink> pour le retrouver plus tard.
+        </p>
+
         <div class="field">
-          <label>Fichier</label>
-          <input ref="fileInput" type="file" @change="onFileChange" />
+          <label for="file">Fichier</label>
+          <input id="file" ref="fileInput" type="file" @change="onFileChange" />
           <p v-if="file" class="muted">{{ file.name }} — {{ formatSize(file.size) }}</p>
         </div>
 
