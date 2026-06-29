@@ -17,29 +17,37 @@ Plateforme de transfert de fichiers : dépôt de fichiers, liens de télécharge
 
 ## Installation & déploiement
 
+### Démarrage rapide (script automatisé)
+
+Le script gère tout : fichiers `.env`, build, clés (`APP_KEY`/`JWT_SECRET`), migrations.
+
 ```bash
-# 1. Cloner le dépôt
 git clone https://github.com/labidiMed/DATASHARE.git
 cd DATASHARE
-
-# 2. Copier la configuration d'infrastructure
-cp .env.example .env
-# (éditer .env pour changer POSTGRES_PASSWORD en production)
-
-# 3. Construire et lancer toute la stack
-docker compose up -d --build
-
-# 4. Générer la clé applicative et la clé JWT (1re installation)
-docker compose exec backend php artisan key:generate
-docker compose exec backend php artisan jwt:secret
-
-# 5. Créer le schéma de base de données
-docker compose exec backend php artisan migrate
 ```
+
+| Système | Démarrer | Arrêter |
+|---|---|---|
+| Linux / macOS / Git Bash | `bash start.sh` | `bash stop.sh` |
+| Windows PowerShell | `.\start.ps1` | `docker compose down` |
+
+> Prérequis : Docker Desktop démarré. Le script est **idempotent** (relançable sans risque).
 
 Accès :
 - **SPA Vue** : http://localhost:5173
 - **API Laravel** : http://localhost:8000/api/v1
+
+### Démarrage manuel (équivalent, étape par étape)
+
+```bash
+cp .env.example .env                 # config infra (éditer POSTGRES_PASSWORD en prod)
+cp backend/.env.example backend/.env # config applicative Laravel
+docker compose up -d --build
+docker compose exec backend php artisan key:generate
+docker compose exec backend php artisan jwt:secret
+docker compose restart backend       # recharge les clés
+docker compose exec backend php artisan migrate
+```
 
 ## Configuration de la base de données
 
@@ -92,6 +100,7 @@ DataShare/
 ├── frontend/          # SPA Vue 3 (src, cypress)
 ├── perf/              # scripts de test de performance k6
 ├── docker-compose.yml # orchestration des 4 conteneurs
+├── start.sh / start.ps1 / stop.sh  # scripts de lancement
 ├── .env.example       # modèle de configuration d'infrastructure
 └── *.md               # documentation (README, TESTING, SECURITY, PERF, MAINTENANCE)
 ```
