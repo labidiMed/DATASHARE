@@ -52,7 +52,7 @@ jobs:
           until docker compose exec -T backend php artisan --version >/dev/null 2>&1; do sleep 3; done
           docker compose exec -T backend php artisan key:generate
           docker compose exec -T backend php artisan jwt:secret --force
-          docker compose restart backend
+          docker compose up -d --force-recreate backend scheduler
           until docker compose exec -T backend php artisan --version >/dev/null 2>&1; do sleep 3; done
           docker compose exec -T backend php artisan migrate --force
 

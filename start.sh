@@ -39,8 +39,9 @@ if ! grep -q '^JWT_SECRET=.\+' backend/.env; then
 fi
 
 # Recharger l'environnement du backend si de nouvelles clés ont été générées
+# (recreate, car « restart » ne relit pas le .env)
 if [ "$NEED_RESTART" = "1" ]; then
-  docker compose restart backend scheduler
+  docker compose up -d --force-recreate backend scheduler
   until docker compose exec -T backend php artisan --version >/dev/null 2>&1; do
     sleep 3
   done
