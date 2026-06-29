@@ -60,6 +60,7 @@ jobs:
         run: until curl -sf http://localhost:5173 >/dev/null; do sleep 3; done
 
       - name: Lancer Cypress
-        uses: cypress-io/github-action@v6
-        with:
-          working-directory: frontend
+        run: |
+          docker run --rm --network host \
+            -v "${{ github.workspace }}/frontend:/e2e" -w /e2e \
+            cypress/included:15.6.0
