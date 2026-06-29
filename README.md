@@ -74,12 +74,21 @@ docker compose down                     # arrêt (conserve les volumes)
 ## Tests
 
 ```bash
-# Tests back-end (PHPUnit) + couverture
-docker compose exec backend php artisan test --coverage
-
-# Tests end-to-end (Cypress) — nécessite la stack lancée
-cd frontend && npm install && npm run e2e
+bash test.sh          # tests back-end (PHPUnit + couverture)
+bash test.sh --e2e    # + tests end-to-end (Cypress)
 ```
+
+Ou manuellement :
+```bash
+docker compose exec backend php artisan test --coverage   # back-end
+cd frontend && npm install && npm run e2e                 # e2e
+```
+
+### Intégration continue (CI)
+
+À chaque `push` sur `main` (et sur chaque Pull Request), GitHub Actions exécute automatiquement :
+- **Tests back-end** (PHPUnit + couverture) — voir [.github/workflows/ci.yml](.github/workflows/ci.yml)
+- **Tests e2e** (Cypress) sur la stack Docker complète
 
 ## Documentation qualité
 

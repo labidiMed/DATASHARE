@@ -1,0 +1,65 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  backend-tests:
+    name: Tests back-end (PHPUnit)
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: backend
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Configurer PHP 8.3
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.3'
+          extensions: pdo_pgsql, pdo_sqlite, bcmath, zip
+          coverage: pcov
+
+      - name: Installer les dépendances
+        run: composer install --no-interaction --prefer-dist
+
+      - name: Préparer l'environnement
+        run: |
+          cp .env.example .env
+          php artisan key:generate
+
+      - name: Lancer les tests + couverture
+        run: php artisan test --coverage
+
+  e2e-tests:
+    name: Tests e2e (Cypress)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Préparer les fichiers .env
+        run: |
+          cp .env.example .env
+          cp backend/.env.example backend/.env
+
+      - name: Démarrer la stack Docker
+        run: docker compose up -d --build
+
+      - name: Préparer le backend (clés + migrations)
+        run: |
+          until docker compose exec -T backend php artisan --version >/dev/null 2>&1; do sleep 3; done
+          docker compose exec -T backend php artisan key:generate
+          docker compose exec -T backend php artisan jwt:secret --force
+          docker compose restart backend
+          until docker compose exec -T backend php artisan --version >/dev/null 2>&1; do sleep 3; done
+          docker compose exec -T backend php artisan migrate --force
+
+      - name: Attendre le front-end
+        run: until curl -sf http://localhost:5173 >/dev/null; do sleep 3; done
+
+      - name: Lancer Cypress
+        uses: cypress-io/github-action@v6
+        with:
+          working-directory: frontend
