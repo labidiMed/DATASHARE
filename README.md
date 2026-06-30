@@ -1,5 +1,7 @@
 # DataShare
 
+[![CI](https://github.com/labidiMed/DATASHARE/actions/workflows/ci.yml/badge.svg)](https://github.com/labidiMed/DATASHARE/actions/workflows/ci.yml)
+
 Plateforme de transfert de fichiers : dépôt de fichiers, liens de téléchargement temporaires (protection par mot de passe, expiration), historique et tags.
 
 **Auteur :** LABIDI Mhamed
